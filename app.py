@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # ============ MongoDB Connection ============
 MONGO_URI = os.environ.get('MONGO_URI')
-client = MongoClient(MONGO_URI)
+mongodb+srv://admin:JEE%40student329@celebraty0.d2rexjc.mongodb.net/?appName=celebraty0
 db = client['app_data']
 photos_col = db['photos']
 locations_col = db['locations']
