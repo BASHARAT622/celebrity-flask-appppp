@@ -7,7 +7,7 @@ import base64
 app = Flask(__name__)
 
 # ============ MongoDB Connection ============
-MONGO_URI = os.environ.get('MONGO_URI')
+MONGO_URI = os.environ.get('https://celebrity-flask-appppp.onrender.com')
 mongodb+srv://admin:JEE%40student329@celebraty0.d2rexjc.mongodb.net/?appName=celebraty0
 db = client['app_data']
 photos_col = db['photos']
